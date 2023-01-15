@@ -1,0 +1,28 @@
+<div class="card-container">
+    <button class="card card-small info" (click)="showModal()">
+        <i class="bi bi-plus-square"> </i> &nbsp;&nbsp;
+        <span>Create Order</span>
+    </button>
+    
+    <button *ngIf="saveBtn" class="card card-small success" (click)="saveOrder()">
+        <i class="bi bi-save"></i> &nbsp;&nbsp;
+      <span>Save Order</span>
+    </button>
+</div>
+
+<!-- Using Inout and Output property binding to send and recieve data -->
+
+<ag-grid-angular 
+    style="width: 100%; height: 100%;" 
+    class="ag-theme-alpine" 
+    [rowData]="rowData"
+    (gridReady)="onGridReady($event)" 
+    [editType]="'fullRow'"
+    (rowValueChanged)="onRowValueChanged($event)"
+    [frameworkComponents]="frameworkComponents" 
+    [columnDefs]="columnDefs" suppressClickEdit>
+</ag-grid-angular>
+
+
+<app-order-modal *ngIf="showOrderModal"(submitOrder)="createOrder($event)" (closeOrder)="showModal()"></app-order-modal>
+  

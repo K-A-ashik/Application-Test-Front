@@ -1,0 +1,90 @@
+<!-- Modal -->
+<div class="modal show in" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+aria-hidden="true">
+   <div class="modal-dialog" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">Create Order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="closeModal()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+           </div>
+           <form [formGroup]="OrderForm" (ngSubmit)="submitModal()" id="orderForm">
+                <div class="modal-body">
+                    <div>  
+                        <div class="container mt-3">
+                            <div>
+                                <div class="form-group">
+                                   <label for="name">Name</label>
+                                   <input type="text" class="form-control"
+                                    id="name" formControlName = "name" [ngClass]="{ 'is-invalid': submitted && orderFormControl['name'].errors }">
+
+                                    <div *ngIf="submitted && orderFormControl['name'].errors" class="invalid-feedback">
+                                        <div *ngIf="orderFormControl['name'].errors['required']">Name is required</div>
+                                    </div>
+                                </div>
+            
+                                <div class="form-group">
+                                    <label for="state">state</label>
+                                    <input type="text" class="form-control"
+                                     id="state" formControlName = "state" [ngClass]="{ 'is-invalid': submitted && orderFormControl['state'].errors }">
+
+                                     <div *ngIf="submitted && orderFormControl['state'].errors" class="invalid-feedback">
+                                         <div *ngIf="orderFormControl['state'].errors['required']">State is required</div>
+                                     </div>
+                                 </div>
+            
+                                 <div class="form-group">
+                                    <label for="zip">zip</label>
+                                    <input type="text" class="form-control"
+                                     id="zip" formControlName = "zip" [ngClass]="{ 'is-invalid': submitted && orderFormControl['zip'].errors }">
+
+                                     <div *ngIf="submitted && orderFormControl['zip'].errors" class="invalid-feedback">
+                                         <div *ngIf="orderFormControl['zip'].errors['required']">Zip is required</div>
+                                         <div *ngIf="orderFormControl['zip'].errors['pattern']">Enter only number.</div>
+                                     </div>
+                                 </div>
+            
+                                 <div class="form-group">
+                                    <label for="amount">amount</label>
+                                    <input type="text" class="form-control"
+                                     id="amount" formControlName = "amount" [ngClass]="{ 'is-invalid': submitted && orderFormControl['amount'].errors }">
+
+                                     <div *ngIf="submitted && orderFormControl['amount'].errors" class="invalid-feedback">
+                                         <div *ngIf="orderFormControl['amount'].errors['required']">Amount is required</div>
+                                         <div *ngIf="orderFormControl['amount'].errors['pattern']">Enter only number.</div>
+                                     </div>
+                                 </div>
+            
+                                 <div class="form-group">
+                                    <label for="quantity">Quantity</label>
+                                    <input type="text" class="form-control"
+                                     id="quantity" formControlName = "quantity" [ngClass]="{ 'is-invalid': submitted && orderFormControl['quantity'].errors }">
+
+                                     <div *ngIf="submitted && orderFormControl['quantity'].errors" class="invalid-feedback">
+                                         <div *ngIf="orderFormControl['quantity'].errors['required']">Quantity is required</div>
+                                         <div *ngIf="orderFormControl['quantity'].errors['pattern']">Enter only number.</div>
+                                     </div>
+                                 </div>
+            
+                                 <div class="form-group">
+                                    <label for="item">Item</label>
+                                    <input type="text" class="form-control"
+                                     id="item" formControlName = "item" [ngClass]="{ 'is-invalid': submitted && orderFormControl['item'].errors }">
+
+                                     <div *ngIf="submitted && orderFormControl['item'].errors" class="invalid-feedback">
+                                         <div *ngIf="orderFormControl['item'].errors['required']">Item is required</div>
+                                     </div>
+                                 </div>
+                            </div>            
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="closeModal()">Close</button>
+                    <button class="btn btn-primary" type="submit" >Submit</button> 
+                </div>
+            </form>
+       </div>
+   </div>
+</div>
