@@ -35,21 +35,22 @@ export class AgTableComponent implements OnInit  {
 
   // Defing column headers
   columnDefs : ColDef[] = [
-      { headerName: 'Id', field: 'id', editable: false },
+      { headerName: 'Id', field: 'id', editable: false, maxWidth: 80 },
       { headerName: 'Name', field: 'name', editable: true },
       { headerName: 'State', field: 'state', editable: true },
-      { headerName: 'Zip', field: 'zip', editable: true, 
+      { headerName: 'Zip', field: 'zip', editable: true, maxWidth: 130,
         valueSetter: (params: ValueSetterParams) => this.checkNumber(params, 'zip')  //to make sure user entered number only
       },
-      { headerName: 'Amount', field: 'amount', editable: true,
+      { headerName: 'Amount', field: 'amount', editable: true, maxWidth: 130,
         valueSetter: (params: ValueSetterParams) => this.checkNumber(params, 'amount')  //to make sure user entered number only
       },
-      { headerName: 'Quantity', field: 'quantity', editable: true, 
+      { headerName: 'Quantity', field: 'quantity', editable: true, maxWidth: 100,
         valueSetter: (params: ValueSetterParams) => this.checkNumber(params, 'quantity')  //to make sure user entered number only
       },
-      { headerName: 'Item', field: 'item', editable: true },
+      { headerName: 'Item', field: 'item', editable: true, maxWidth: 130 },
       {
         headerName: 'Actions',
+        minWidth: 150,
         cellRenderer: 'buttonRenderer',
         editable: false,
         cellRendererParams: {
@@ -93,6 +94,7 @@ export class AgTableComponent implements OnInit  {
   onGridReady(params:any)
   {
     this.api = params.api;
+    params.api.sizeColumnsToFit();
   }
   
   //This is used open order form.
@@ -169,7 +171,7 @@ export class AgTableComponent implements OnInit  {
       this.apiService.delete(params.rowData.id).subscribe({
         next : (result : any) => {
           if(result.status) {
-            this.toastService.showSuccessToast('', 'Order deleted!.');
+            this.toastService.showSuccessToast('', 'Order deleted successfully!.');
             this.getOrder();
           } else {
             this.toastService.showErrorToast('','Error on delete please try again!');
