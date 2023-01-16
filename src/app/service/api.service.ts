@@ -15,7 +15,7 @@ export class ApiDataService {
         return this.http.get<any[]>(environment.contentful.baseUrl);
     }
 
-    create(data: any): Observable<any> {
+    create(data: Order): Observable<any> {
         return this.http.post(environment.contentful.baseUrl, data);
     }
 

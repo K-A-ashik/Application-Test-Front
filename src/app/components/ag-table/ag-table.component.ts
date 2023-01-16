@@ -83,7 +83,7 @@ export class AgTableComponent implements OnInit  {
   getOrder() {
     this.apiService.getAll().subscribe({
       next : (result : any) => {
-        this.rowData = result.data;
+        this.rowData = result.response;
       },
       error: (e) => console.error(e)
     })
@@ -116,66 +116,71 @@ export class AgTableComponent implements OnInit  {
     }
   }
 
-  // on delete button clicked it will navigate here
-  onDeleteButtonClick(params:any)
-  {
-    this.apiService.getAll().subscribe({
-      next : (result : any) => {
-        this.toastService.showErrorToast('', 'Order deleted!.');
-        
-      },
-      error: (e) => console.error(e)
-    })
-    
-  }
-
   // On order form popup submit this function will be called and order will be created.
   createOrder(orderDetails : Order): void {
 
-
-      let newRowData = this.rowData.slice();
-      orderDetails.id = parseInt(this.rowData[this.rowData.length-1].id)+1;
-      console.log(orderDetails);
-      newRowData.push(orderDetails);
-      this.rowData = newRowData;
-      this.showModal();
-      this.toastService.showSuccessToast('','Order created successfully');
-      console.log(newRowData);
-      
-      return;
-      // this.apiService.getAll().subscribe({
-      //   next : (result : any) => {
-      //     console.log('deleted');
-          
-      //   },
-      //   error: (e) => console.error(e)
-      // })
-
-      // Do API call here
+      if(orderDetails) {
+        orderDetails.id = parseInt(this.rowData[this.rowData.length-1].id)+1;
+        
+        this.apiService.create(orderDetails).subscribe({
+          next : (result : any) => {
+            
+            this.toastService.showSuccessToast(result,'Order created successfully');
+            this.getOrder();
+            this.showModal();    
+          },
+          error: (e) => console.error(e)
+        })
+      } else {
+        this.toastService.showErrorToast('','Error on creation please try again!');
+      }
   }
 
   // This function is to stop the editing on the ag grid.
   saveOrder() {
-    this.saveBtn = false;
     this.api.stopEditing();
   }
 
   // After saveOrder() this function will be called, here we will call update API.
   onRowValueChanged(params:any)
-  {    
-    if(this.validate_user_data(params.data)) {
-      // Call edit API here
-      this.apiService.getAll().subscribe({
+  {
+    if(this.saveBtn) {
+      if(this.validate_user_data(params.data)) {
+        this.saveBtn = false;
+        // Call edit API here      
+        this.apiService.update(params.data.id ,params.data).subscribe({
+          next : (result : any) => {
+            this.toastService.showSuccessToast('','Order Updated successfully');
+            this.getOrder();
+          },
+          error: (e) => console.error(e)
+        })
+        
+      } else {
+        this.toastService.showErrorToast('','Please fill all the fields!');
+      }
+    }
+  }
+
+  // on delete button clicked it will navigate here
+  onDeleteButtonClick(params:any)
+  {
+    if(params.rowData.id) {
+      this.apiService.delete(params.rowData.id).subscribe({
         next : (result : any) => {
-          console.log('Updated');
-          this.toastService.showSuccessToast('','Order Updated successfully');
+          if(result.status) {
+            this.toastService.showSuccessToast('', 'Order deleted!.');
+            this.getOrder();
+          } else {
+            this.toastService.showErrorToast('','Error on delete please try again!');
+          }
         },
         error: (e) => console.error(e)
       })
-      
     } else {
-      console.log('error on saving params - ', params);
+      this.toastService.showErrorToast('','Error on delete please try again!');
     }
+    
   }
 
   // This is to validate the user input from ag grid and to make sure user enteres number only.
@@ -184,6 +189,11 @@ export class AgTableComponent implements OnInit  {
       let valueChanged = params.data[col] !== newValInt;
       if (valueChanged) {
         params.data[col] = newValInt ? newValInt : params.oldValue;
+      }
+      
+      if(isNaN(newValInt)) {
+        this.saveBtn = false;
+        this.toastService.showErrorToast('','Please enter only number!');
       }
       return valueChanged;
   }
