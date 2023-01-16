@@ -35,7 +35,7 @@ export class OrderModalComponent {
         'state':['',Validators.required],
         'zip':['',[Validators.required, Validators.pattern("^[0-9]*$")]],
         'amount':['',[Validators.required, Validators.pattern("^[0-9]*$")]],
-        'quantity':['', [Validators.required, Validators.pattern("^[0-9]*$")]],
+        'qty':['', [Validators.required, Validators.pattern("^[0-9]*$")]],
         'item':['',Validators.required],
     });
   }

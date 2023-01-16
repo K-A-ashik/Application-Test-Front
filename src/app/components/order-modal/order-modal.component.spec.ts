@@ -37,7 +37,7 @@ describe('OrderModalComponent', () => {
       state : '',
       zip : '',
       amount : '',
-      quantity : '',
+      qty : '',
       item : ''
     };
 
@@ -50,7 +50,7 @@ describe('OrderModalComponent', () => {
       component.OrderForm.controls['state'].setValue("Karnataka");
       component.OrderForm.controls['zip'].setValue(56009);
       component.OrderForm.controls['amount'].setValue(150000);
-      component.OrderForm.controls['quantity'].setValue(15);
+      component.OrderForm.controls['qty'].setValue(15);
       component.OrderForm.controls['item'].setValue('AHG54645L');
       expect(component.OrderForm.valid).toBeTruthy();
 
@@ -67,7 +67,7 @@ describe('OrderModalComponent', () => {
         expect(order.state).toBe("Karnataka");
         expect(order.zip).toBe(56009);
         expect(order.amount).toBe(150000);
-        expect(order.quantity).toBe(15);
+        expect(order.qty).toBe(15);
         expect(order.item).toBe("AHG54645L");
       });
   });

@@ -6,6 +6,7 @@ import { EventTypes } from 'src/app/interface/event-types';
 import { CustomToastService } from 'src/app/service/custom-toast.service';
 import {
   ColDef,
+  DomLayoutType,
   GridApi,
   ValueSetterParams,
 } from 'ag-grid-community';
@@ -44,8 +45,8 @@ export class AgTableComponent implements OnInit  {
       { headerName: 'Amount', field: 'amount', editable: true, maxWidth: 130,
         valueSetter: (params: ValueSetterParams) => this.checkNumber(params, 'amount')  //to make sure user entered number only
       },
-      { headerName: 'Quantity', field: 'quantity', editable: true, maxWidth: 100,
-        valueSetter: (params: ValueSetterParams) => this.checkNumber(params, 'quantity')  //to make sure user entered number only
+      { headerName: 'Qty', field: 'qty', editable: true, maxWidth: 100,
+        valueSetter: (params: ValueSetterParams) => this.checkNumber(params, 'qty')  //to make sure user entered number only
       },
       { headerName: 'Item', field: 'item', editable: true, maxWidth: 130 },
       {
@@ -64,7 +65,9 @@ export class AgTableComponent implements OnInit  {
   api!: GridApi;
   showOrderModal: boolean = false;
   saveBtn : boolean = false;
+  save : boolean = true;
   EventTypes = EventTypes;
+  public domLayout: DomLayoutType = 'autoHeight';
 
   constructor(private apiService : ApiDataService, private toastService: CustomToastService)
   {
@@ -108,12 +111,14 @@ export class AgTableComponent implements OnInit  {
     if(params.action == 'edit') {
       
       this.saveBtn = true;
+      this.save = true;
       this.api.startEditingCell({
         rowIndex: params.rowIndex,
         colKey: 'name'
       });
 
     } else {
+      this.saveBtn = false;
       this.onDeleteButtonClick(params)
     }
   }
@@ -121,6 +126,7 @@ export class AgTableComponent implements OnInit  {
   // On order form popup submit this function will be called and order will be created.
   createOrder(orderDetails : Order): void {
 
+      this.saveBtn = false;
       if(orderDetails) {
         orderDetails.id = parseInt(this.rowData[this.rowData.length-1].id)+1;
         
@@ -141,14 +147,18 @@ export class AgTableComponent implements OnInit  {
   // This function is to stop the editing on the ag grid.
   saveOrder() {
     this.api.stopEditing();
+    this.saveBtn = false;
   }
 
   // After saveOrder() this function will be called, here we will call update API.
   onRowValueChanged(params:any)
   {
-    if(this.saveBtn) {
+    
+    if(this.save) {
       if(this.validate_user_data(params.data)) {
+        this.save = false;
         this.saveBtn = false;
+        
         // Call edit API here      
         this.apiService.update(params.data.id ,params.data).subscribe({
           next : (result : any) => {
@@ -194,7 +204,7 @@ export class AgTableComponent implements OnInit  {
       }
       
       if(isNaN(newValInt)) {
-        this.saveBtn = false;
+        this.save = false;
         this.toastService.showErrorToast('','Please enter only number!');
       }
       return valueChanged;
@@ -202,11 +212,15 @@ export class AgTableComponent implements OnInit  {
 
   // This function is to validate the user entered data after ag grid row editing.
   validate_user_data(rowData : Order) {
-    if(!rowData.amount || !rowData.quantity || !rowData.zip || !rowData.name || !rowData.item || !rowData.state) {
+    if(!rowData.amount || !rowData.qty || !rowData.zip || !rowData.name || !rowData.item || !rowData.state) {
       return false;
     } else{
       return true;
     }
 
+  }
+
+  onRowEditingStopped(params : any) {
+    this.saveBtn = false;
   }
 }

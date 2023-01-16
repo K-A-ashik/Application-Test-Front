@@ -57,13 +57,13 @@ aria-hidden="true">
                                  </div>
             
                                  <div class="form-group">
-                                    <label for="quantity">Quantity</label>
+                                    <label for="qty">Quantity</label>
                                     <input type="text" class="form-control"
-                                     id="quantity" formControlName = "quantity" [ngClass]="{ 'is-invalid': submitted && orderFormControl['quantity'].errors }">
+                                     id="qty" formControlName = "qty" [ngClass]="{ 'is-invalid': submitted && orderFormControl['qty'].errors }">
 
-                                     <div *ngIf="submitted && orderFormControl['quantity'].errors" class="invalid-feedback">
-                                         <div *ngIf="orderFormControl['quantity'].errors['required']">Quantity is required</div>
-                                         <div *ngIf="orderFormControl['quantity'].errors['pattern']">Enter only number.</div>
+                                     <div *ngIf="submitted && orderFormControl['qty'].errors" class="invalid-feedback">
+                                         <div *ngIf="orderFormControl['qty'].errors['required']">Quantity is required</div>
+                                         <div *ngIf="orderFormControl['qty'].errors['pattern']">Enter only number.</div>
                                      </div>
                                  </div>
             

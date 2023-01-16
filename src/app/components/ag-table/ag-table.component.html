@@ -13,13 +13,15 @@
 <!-- Using Inout and Output property binding to send and recieve data -->
 <div id="grid-wrapper">
     <ag-grid-angular 
-        style="width: 100%; height: 100%;" 
+        style="width: 100%;"
+        [domLayout]="domLayout"
         class="ag-theme-alpine" 
         [rowData]="rowData"
         (gridReady)="onGridReady($event)" 
         [editType]="'fullRow'"
         (rowValueChanged)="onRowValueChanged($event)"
-        [frameworkComponents]="frameworkComponents" 
+        (rowEditingStopped)="onRowEditingStopped($event)"
+        [frameworkComponents]="frameworkComponents"
         [columnDefs]="columnDefs" 
         [pagination]="true"
         [paginationPageSize]="10"

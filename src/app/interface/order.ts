@@ -4,7 +4,7 @@ export interface Order {
     state : string
     zip : number
     amount : number
-    quantity : number
+    qty : number
     item : string
 }
 
@@ -17,7 +17,7 @@ export const MOCK_ORDER = {
             "state": "Karnataka",
             "zip": "560093",
             "amount": "15000",
-            "quantity": "4",
+            "qty": "4",
             "item": "AAH6748"
         }
     ]
