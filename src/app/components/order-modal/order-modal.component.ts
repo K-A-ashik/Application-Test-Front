@@ -25,18 +25,18 @@ export class OrderModalComponent {
 
    // This is another method of declaring the output to child parent comunication 
   @Output() submitOrder : EventEmitter<Order> = new EventEmitter<Order>();
-  closeOrder: EventEmitter<any> = new EventEmitter<any>();
+  closeOrder: EventEmitter<[]> = new EventEmitter<[]>();
 
 
   constructor(private formBuilder: FormBuilder) {
     // Adding the form validation in the reactive form.
     this.OrderForm = this.formBuilder.group({
-        'name':['',Validators.required],
-        'state':['',Validators.required],
-        'zip':['',[Validators.required, Validators.pattern("^[0-9]*$")]],
-        'amount':['',[Validators.required, Validators.pattern("^[0-9]*$")]],
-        'qty':['', [Validators.required, Validators.pattern("^[0-9]*$")]],
-        'item':['',Validators.required],
+        'name':['', [Validators.required, Validators.pattern("^[a-zA-Z ]*$"), Validators.maxLength(30)]],
+        'state':['',[Validators.required, Validators.pattern("^[a-zA-Z ]*$"), Validators.maxLength(20)]],
+        'zip':['',[Validators.required, Validators.pattern("^[0-9]*$"), Validators.maxLength(6), Validators.minLength(6)]],
+        'amount':['',[Validators.required, Validators.pattern("([0-9]*[.])?[0-9]+")]],
+        'qty':['', [Validators.required, Validators.pattern("^[0-9]*$"), Validators.maxLength(8)]],
+        'item':['',[Validators.required, Validators.pattern("^[a-zA-Z0-9 ]+$")]],
     });
   }
 

@@ -1,13 +1,16 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { EditButtonComponent } from 'src/app/renderer/edit-button.component';
-import { Order } from 'src/app/interface/order';
+import { Order, Response, CellParam } from 'src/app/interface/order';
 import { ApiDataService } from 'src/app/service/api.service';
-import { EventTypes } from 'src/app/interface/event-types';
 import { CustomToastService } from 'src/app/service/custom-toast.service';
 import {
   ColDef,
   DomLayoutType,
   GridApi,
+  GridReadyEvent,
+  ICellRendererParams,
+  RowEditingStartedEvent,
+  RowEditingStoppedEvent,
+  RowValueChangedEvent,
   ValueSetterParams,
 } from 'ag-grid-community';
 
@@ -20,10 +23,34 @@ import {
    * @param apiService  to comunicate with the backend using service.
    * @param columnDefs Ag Grid Headers.
    * @param rowData Ag Grid row values.
-   * @param frameworkComponents Ag Grid additional components.
    * @param encapsulation Using ViewEncapsulation.None to make the styles available across the documents.
 */
 
+
+function actionCellRenderer(params : ICellRendererParams) {
+
+  let eGui = document.createElement("div");
+
+  let editingCells = params.api.getEditingCells();
+  // checks if the rowIndex matches in at least one of the editing cells
+  let isCurrentRowEditing = editingCells.some((cell:CellParam) => {
+    return cell.rowIndex === params.node.rowIndex;
+  });
+
+  if (isCurrentRowEditing) {
+    eGui.innerHTML = `
+    <button  class="buttonStyle btn btn-primary update"  data-action="update"> save <i class="bi bi-save"></i>  </button>
+    <button  class="buttonStyle btn btn-primary cancel"  data-action="cancel"> cancel <i class="bi bi-x-square"></i> </button>
+    `;
+  } else {
+    eGui.innerHTML = `
+    <button class="buttonStyle btn btn-primary edit"  data-action="edit"> edit <i class="bi bi-pen"></i> </button>
+    <button class="buttonStyle btn btn-primary delete" data-action="delete"> delete<i class="bi bi-trash3"></i> </button>
+    `;
+  }
+
+  return eGui;
+}
 
 
 @Component({
@@ -36,7 +63,11 @@ export class AgTableComponent implements OnInit  {
 
   // Defing column headers
   columnDefs : ColDef[] = [
-      { headerName: 'Id', field: 'id', editable: false, maxWidth: 80 },
+      { headerName: 'Id', field: 'id', editable: false, maxWidth: 140,
+        headerCheckboxSelection: true,
+        headerCheckboxSelectionFilteredOnly: true,
+        checkboxSelection: true,
+      },
       { headerName: 'Name', field: 'name', editable: true },
       { headerName: 'State', field: 'state', editable: true },
       { headerName: 'Zip', field: 'zip', editable: true, maxWidth: 130,
@@ -45,36 +76,45 @@ export class AgTableComponent implements OnInit  {
       { headerName: 'Amount', field: 'amount', editable: true, maxWidth: 130,
         valueSetter: (params: ValueSetterParams) => this.checkNumber(params, 'amount')  //to make sure user entered number only
       },
-      { headerName: 'Qty', field: 'qty', editable: true, maxWidth: 100,
+      { headerName: 'Quantity', field: 'qty', editable: true, maxWidth: 140,
         valueSetter: (params: ValueSetterParams) => this.checkNumber(params, 'qty')  //to make sure user entered number only
       },
       { headerName: 'Item', field: 'item', editable: true, maxWidth: 130 },
       {
-        headerName: 'Actions',
+        headerName: "action",
         minWidth: 150,
-        cellRenderer: 'buttonRenderer',
+        cellRenderer: actionCellRenderer,
         editable: false,
-        cellRendererParams: {
-          onClick: this.onButtonClick.bind(this),
-        },
+        colId: "action",
+        sortable : false
       }
   ];
   
-  rowData : any = [];
-  frameworkComponents: any;
+  // Column Configuration
+  defaultColDef : ColDef = {
+        sortingOrder: ["asc", "desc"],
+        sortable:true,
+        filter: true
+  };
+
+  // Row Data
+  rowData : Order[] = [];
   api!: GridApi;
   showOrderModal: boolean = false;
-  saveBtn : boolean = false;
-  save : boolean = true;
-  EventTypes = EventTypes;
-  public domLayout: DomLayoutType = 'autoHeight';
+  domLayout: DomLayoutType = 'autoHeight';
+  updateFlag : boolean = false;
+  editingRow: Order = {
+    id: 0,
+    name: '',
+    state: '',
+    zip: 0,
+    amount: 0,
+    qty: 0,
+    item: ''
+  };
 
   constructor(private apiService : ApiDataService, private toastService: CustomToastService)
   {
-    // components used in ag grid.
-    this.frameworkComponents = {
-      buttonRenderer: EditButtonComponent,
-    }
   }
 
   // Once called in the component life-cycle.
@@ -86,15 +126,15 @@ export class AgTableComponent implements OnInit  {
   // on init calling get order API.
   getOrder() {
     this.apiService.getAll().subscribe({
-      next : (result : any) => {
+      next : (result : Response) => {
         this.rowData = result.response;
       },
-      error: (e) => console.error(e)
+      error: (e) => this.toastService.showErrorToast('','Error on order listing!')
     })
   }
 
   // this will be called on inti of ag grid.
-  onGridReady(params:any)
+  onGridReady(params:GridReadyEvent)
   {
     this.api = params.api;
     params.api.sizeColumnsToFit();
@@ -105,81 +145,59 @@ export class AgTableComponent implements OnInit  {
     this.showOrderModal = !this.showOrderModal;
   }
 
-  // On edit or delete button clicked this fn will be called.
-  onButtonClick(params:any)
-  {
-    if(params.action == 'edit') {
-      
-      this.saveBtn = true;
-      this.save = true;
-      this.api.startEditingCell({
-        rowIndex: params.rowIndex,
-        colKey: 'name'
-      });
-
-    } else {
-      this.saveBtn = false;
-      this.onDeleteButtonClick(params)
-    }
-  }
-
   // On order form popup submit this function will be called and order will be created.
   createOrder(orderDetails : Order): void {
 
-      this.saveBtn = false;
-      if(orderDetails) {
-        orderDetails.id = parseInt(this.rowData[this.rowData.length-1].id)+1;
-        
+      if(orderDetails) {        
         this.apiService.create(orderDetails).subscribe({
-          next : (result : any) => {
+          next : (result : Response) => {
             
-            this.toastService.showSuccessToast(result,'Order created successfully');
+            this.toastService.showSuccessToast('','Order created successfully');
             this.getOrder();
-            this.showModal();    
+            this.showModal();
           },
-          error: (e) => console.error(e)
+          error: (e) => this.toastService.showErrorToast('','Error on creation please try again!')
         })
       } else {
         this.toastService.showErrorToast('','Error on creation please try again!');
       }
   }
 
-  // This function is to stop the editing on the ag grid.
-  saveOrder() {
-    this.api.stopEditing();
-    this.saveBtn = false;
+  // This function is called on save, which will update the order data
+  updateOrder(data:Order) {
+    if(this.validate_user_data(data)) {
+      // Call edit API here      
+      this.apiService.update(data.id ,data).subscribe({
+        next : () => {
+          this.toastService.showSuccessToast('','Order Updated successfully');
+          this.getOrder();
+        },
+        error: (e) => this.toastService.showErrorToast('','Please fill all the fields!')
+      })
+      
+    } else {
+      this.toastService.showErrorToast('','Please fill all the fields!');
+    }    
+    
   }
 
   // After saveOrder() this function will be called, here we will call update API.
-  onRowValueChanged(params:any)
+  onRowValueChanged(params:RowValueChangedEvent)
   {
-    
-    if(this.save) {
-      if(this.validate_user_data(params.data)) {
-        this.save = false;
-        this.saveBtn = false;
-        
-        // Call edit API here      
-        this.apiService.update(params.data.id ,params.data).subscribe({
-          next : (result : any) => {
-            this.toastService.showSuccessToast('','Order Updated successfully');
-            this.getOrder();
-          },
-          error: (e) => console.error(e)
-        })
-        
-      } else {
-        this.toastService.showErrorToast('','Please fill all the fields!');
-      }
-    }
+    params.api.refreshCells({
+      columns: ["action"],
+      rowNodes: [params.node],
+      force: true
+    });
+
   }
 
-  // on delete button clicked it will navigate here
-  onDeleteButtonClick(params:any)
+  // On delete button clicked it will navigate here
+  onDeleteButtonClick(id:string)
   {
-    if(params.rowData.id) {
-      this.apiService.delete(params.rowData.id).subscribe({
-        next : (result : any) => {
+    if(id) {
+      this.apiService.delete(id).subscribe({
+        next : (result : Response) => {
           if(result.status) {
             this.toastService.showSuccessToast('', 'Order deleted successfully!.');
             this.getOrder();
@@ -187,12 +205,22 @@ export class AgTableComponent implements OnInit  {
             this.toastService.showErrorToast('','Error on delete please try again!');
           }
         },
-        error: (e) => console.error(e)
+        error: (e) => this.toastService.showErrorToast('','Error on delete please try again!')
       })
     } else {
       this.toastService.showErrorToast('','Error on delete please try again!');
     }
     
+  }
+
+  // This function will delete multiple data at once, params are passed as id seprated by commas.
+  onDeleteMultiple() {
+    let selectedData = this.api.getSelectedRows();
+    let ids = selectedData.map(order => order.id).join(',');
+    this.onDeleteButtonClick(ids);
+    this.api.applyTransaction({
+      remove: selectedData
+    });
   }
 
   // This is to validate the user input from ag grid and to make sure user enteres number only.
@@ -204,7 +232,6 @@ export class AgTableComponent implements OnInit  {
       }
       
       if(isNaN(newValInt)) {
-        this.save = false;
         this.toastService.showErrorToast('','Please enter only number!');
       }
       return valueChanged;
@@ -220,7 +247,70 @@ export class AgTableComponent implements OnInit  {
 
   }
 
-  onRowEditingStopped(params : any) {
-    this.saveBtn = false;
+  // On edit, update, cancel or delete button clicked this fn will be called.
+  onCellClicked(params: any) {
+    // Handle click event for action cells
+    if (params.column.colId === "action" && params.event.target.parentNode.getAttribute('data-action')) {
+      let action = params.event.target.parentNode.getAttribute('data-action');
+      if (action === "edit") {
+        params.api.startEditingCell({
+          rowIndex: params.node.rowIndex,
+          // gets the first columnKey
+          colKey: params.columnApi.getDisplayedCenterColumns()[0].colId
+        });
+      }
+
+      if (action === "delete") {
+        // call delete function
+        this.onDeleteButtonClick(params.node.data.id);
+        params.api.applyTransaction({
+          remove: [params.node.data]
+        });
+      }
+
+      if (action === "update") {
+        // call update
+        params.api.stopEditing(false);
+        this.updateFlag = true;
+        this.updateOrder(params.data)
+      }
+
+      if (action === "cancel") {
+        params.api.stopEditing(true);
+      }
+    }
   }
+
+  // This function is to toggle the action button onclick of edit
+  onRowEditingStarted(params:RowEditingStartedEvent) {
+    this.updateFlag = false;
+    this.editingRow = JSON.parse(JSON.stringify(params.node.data));
+    params.api.refreshCells({
+      columns: ["action"],
+      rowNodes: [params.node],
+      force: true
+    });
+  }
+
+  // This function is to toggle the action button when editing stopped
+  onRowEditingStopped(params:RowEditingStoppedEvent) {
+    if(this.editingRow.id !=0 && !this.updateFlag) {
+      let rowNode = params.api.getRowNode(String(params.node.rowIndex))!;
+      rowNode.setData(this.editingRow);
+    }
+    params.api.refreshCells({
+      columns: ["action"],
+      rowNodes: [params.node],
+      force: true
+    });
+  }
+
+  // To search order data
+  onQuickFilterChanged() {
+    this.api.setQuickFilter(
+      (document.getElementById('quickFilter') as HTMLInputElement).value
+    );
+  }
+
+
 }

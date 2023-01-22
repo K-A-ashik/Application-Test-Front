@@ -13,7 +13,6 @@ import { AppRoutingModule } from './app-routing.module';
 
 // App components
 import { AppComponent } from './app.component';
-import { EditButtonComponent } from './renderer/edit-button.component';
 import { AgTableComponent } from './components/ag-table/ag-table.component';
 import { OrderModalComponent } from './components/order-modal/order-modal.component';
 import { ToastComponent } from './components/toast/toast.component';
@@ -22,7 +21,6 @@ import { ToasterComponent } from './components/toaster/toaster.component';
 @NgModule({
   declarations: [
     AppComponent,
-    EditButtonComponent,
     AgTableComponent,
     OrderModalComponent,
     ToastComponent,

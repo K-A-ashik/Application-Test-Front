@@ -1,17 +1,24 @@
-<div class="card-container">
-    <button class="card card-small info" (click)="showModal()">
-        <i class="bi bi-plus-square"> </i> &nbsp;&nbsp;
-        <span>Create Order</span>
-    </button>
-    
-    <button *ngIf="saveBtn" class="card card-small success" (click)="saveOrder()">
-        <i class="bi bi-save"></i> &nbsp;&nbsp;
-      <span>Save Order</span>
-    </button>
-</div>
-
 <!-- Using Inout and Output property binding to send and recieve data -->
 <div id="grid-wrapper">
+    <div style="margin-bottom: 5px;display: flow-root;">
+        <input
+          type="text"
+          (input)="onQuickFilterChanged()"
+          id="quickFilter"
+          placeholder="quick filter..."
+        />
+
+        <button *ngIf="this.api?.getSelectedRows()?.length" class="card card-small error" (click)="onDeleteMultiple()" style="float: right;">
+            <i class="bi bi-trash3"> </i> &nbsp;&nbsp;
+            <span>Delete</span>
+        </button>
+
+        <button class="card card-small info" (click)="showModal()" style="float: right;">
+            <i class="bi bi-plus-square"> </i> &nbsp;&nbsp;
+            <span>Create Order</span>
+        </button>
+    </div>
+
     <ag-grid-angular 
         style="width: 100%;"
         [domLayout]="domLayout"
@@ -21,8 +28,12 @@
         [editType]="'fullRow'"
         (rowValueChanged)="onRowValueChanged($event)"
         (rowEditingStopped)="onRowEditingStopped($event)"
-        [frameworkComponents]="frameworkComponents"
+        (cellClicked)="onCellClicked($event)"
+        (rowEditingStarted)="onRowEditingStarted($event)"
+        [suppressRowClickSelection]="true"
+        [rowSelection]="'multiple'"
         [columnDefs]="columnDefs" 
+        [defaultColDef] = "defaultColDef"
         [pagination]="true"
         [paginationPageSize]="10"
         suppressClickEdit>

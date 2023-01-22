@@ -8,6 +8,16 @@ export interface Order {
     item : string
 }
 
+export interface Response {
+    message : string,
+    status : boolean,
+    response : Order[]
+}
+
+export interface CellParam {
+    rowIndex : number
+}
+
 export const MOCK_ORDER = {
     ststus_code : 200,
     response : [

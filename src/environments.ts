@@ -1,6 +1,6 @@
 export const environment = {
     production: true,
     contentful: {
-      baseUrl : 'http://localhost/backend-main/orders',
+      baseUrl : 'http://localhost/backend-main/orders.php',
     }
 };

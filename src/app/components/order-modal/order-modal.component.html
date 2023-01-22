@@ -21,6 +21,8 @@ aria-hidden="true">
 
                                     <div *ngIf="submitted && orderFormControl['name'].errors" class="invalid-feedback">
                                         <div *ngIf="orderFormControl['name'].errors['required']">Name is required</div>
+                                        <div *ngIf="orderFormControl['name'].errors['pattern']">Enter only letters</div>
+                                        <div *ngIf="orderFormControl['name'].errors['maxlength']">The accepted length is {{orderFormControl['name'].errors['maxlength'].requiredLength}} </div>
                                     </div>
                                 </div>
             
@@ -31,6 +33,8 @@ aria-hidden="true">
 
                                      <div *ngIf="submitted && orderFormControl['state'].errors" class="invalid-feedback">
                                          <div *ngIf="orderFormControl['state'].errors['required']">State is required</div>
+                                         <div *ngIf="orderFormControl['state'].errors['pattern']">Enter only letters</div>
+                                         <div *ngIf="orderFormControl['state'].errors['maxlength']">The accepted length is {{orderFormControl['state'].errors['maxlength'].requiredLength}} </div>
                                      </div>
                                  </div>
             
@@ -41,7 +45,9 @@ aria-hidden="true">
 
                                      <div *ngIf="submitted && orderFormControl['zip'].errors" class="invalid-feedback">
                                          <div *ngIf="orderFormControl['zip'].errors['required']">Zip is required</div>
-                                         <div *ngIf="orderFormControl['zip'].errors['pattern']">Enter only number.</div>
+                                         <div *ngIf="orderFormControl['zip'].errors['pattern']">Enter only numbers.</div>
+                                         <div *ngIf="orderFormControl['zip'].errors['maxlength']">The accepted length is {{orderFormControl['zip'].errors['maxlength'].requiredLength}} </div>
+                                         <div *ngIf="orderFormControl['zip'].errors['minlength']">The accepted length is {{orderFormControl['zip'].errors['minlength'].requiredLength}} </div>
                                      </div>
                                  </div>
             
@@ -49,7 +55,6 @@ aria-hidden="true">
                                     <label for="amount">amount</label>
                                     <input type="text" class="form-control"
                                      id="amount" formControlName = "amount" [ngClass]="{ 'is-invalid': submitted && orderFormControl['amount'].errors }">
-
                                      <div *ngIf="submitted && orderFormControl['amount'].errors" class="invalid-feedback">
                                          <div *ngIf="orderFormControl['amount'].errors['required']">Amount is required</div>
                                          <div *ngIf="orderFormControl['amount'].errors['pattern']">Enter only number.</div>
@@ -64,6 +69,7 @@ aria-hidden="true">
                                      <div *ngIf="submitted && orderFormControl['qty'].errors" class="invalid-feedback">
                                          <div *ngIf="orderFormControl['qty'].errors['required']">Quantity is required</div>
                                          <div *ngIf="orderFormControl['qty'].errors['pattern']">Enter only number.</div>
+                                         <div *ngIf="orderFormControl['qty'].errors['maxlength']">The accepted length is {{orderFormControl['qty'].errors['maxlength'].requiredLength}} </div>
                                      </div>
                                  </div>
             
@@ -74,6 +80,7 @@ aria-hidden="true">
 
                                      <div *ngIf="submitted && orderFormControl['item'].errors" class="invalid-feedback">
                                          <div *ngIf="orderFormControl['item'].errors['required']">Item is required</div>
+                                         <div *ngIf="orderFormControl['item'].errors['pattern']">Only letters and numbers are accepted.</div>
                                      </div>
                                  </div>
                             </div>            
