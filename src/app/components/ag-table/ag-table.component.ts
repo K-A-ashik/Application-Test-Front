@@ -39,13 +39,13 @@ function actionCellRenderer(params : ICellRendererParams) {
 
   if (isCurrentRowEditing) {
     eGui.innerHTML = `
-    <button  class="buttonStyle btn btn-primary update"  data-action="update"> save <i class="bi bi-save"></i>  </button>
-    <button  class="buttonStyle btn btn-primary cancel"  data-action="cancel"> cancel <i class="bi bi-x-square"></i> </button>
+    <button  class="buttonStyle btn btn-primary update"  data-action="update"> <i class="bi bi-save"></i>  </button>
+    <button  class="buttonStyle btn btn-primary cancel"  data-action="cancel"> <i class="bi bi-x-square"></i> </button>
     `;
   } else {
     eGui.innerHTML = `
-    <button class="buttonStyle btn btn-primary edit"  data-action="edit"> edit <i class="bi bi-pen"></i> </button>
-    <button class="buttonStyle btn btn-primary delete" data-action="delete"> delete<i class="bi bi-trash3"></i> </button>
+    <button class="buttonStyle btn btn-primary edit"  data-action="edit"> <i class="bi bi-pen"></i> </button>
+    <button class="buttonStyle btn btn-primary delete" data-action="delete"> <i class="bi bi-trash3"></i> </button>
     `;
   }
 
@@ -151,10 +151,13 @@ export class AgTableComponent implements OnInit  {
       if(orderDetails) {        
         this.apiService.create(orderDetails).subscribe({
           next : (result : Response) => {
-            
-            this.toastService.showSuccessToast('','Order created successfully');
-            this.getOrder();
-            this.showModal();
+            if(result.status) {
+              this.toastService.showSuccessToast('','Order created successfully');
+              this.getOrder();
+              this.showModal();
+            } else {
+              this.toastService.showErrorToast('',result.message)
+            }
           },
           error: (e) => this.toastService.showErrorToast('','Error on creation please try again!')
         })
@@ -168,8 +171,12 @@ export class AgTableComponent implements OnInit  {
     if(this.validate_user_data(data)) {
       // Call edit API here      
       this.apiService.update(data.id ,data).subscribe({
-        next : () => {
-          this.toastService.showSuccessToast('','Order Updated successfully');
+        next : (result) => {
+          if(result.status) {
+            this.toastService.showSuccessToast('','Order Updated successfully');
+          } else {
+            this.toastService.showErrorToast('',result.message)
+          }
           this.getOrder();
         },
         error: (e) => this.toastService.showErrorToast('','Please fill all the fields!')
